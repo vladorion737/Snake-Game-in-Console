@@ -99,7 +99,7 @@ public class Snake
     }
     public class Food
     {
-        SoundPlayer player = new SoundPlayer("bipka.wav");
+        SoundPlayer player = new SoundPlayer("../../../bipka.wav");
         public int x { get; set; }
         public int y { get; set; }
 
