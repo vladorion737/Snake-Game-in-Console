@@ -1,4 +1,5 @@
-﻿
+﻿using System.Media;
+
 public class Snake
 {
     public char dir { get; set; } = 'R'; // R, L, U, D
@@ -98,11 +99,13 @@ public class Snake
     }
     public class Food
     {
+        SoundPlayer player = new SoundPlayer("bipka.wav");
         public int x { get; set; }
         public int y { get; set; }
 
         public void GenerateFood(Segment[] segments, int gamefield)
         {
+            player.Play();
             Random rand = new Random();
             x = rand.Next(0, gamefield);
             y = rand.Next(0, gamefield);
@@ -134,7 +137,7 @@ public class Screen
 
     public void UpdateScreen(Snake s)
     {
-        
+
         for (int i = 0; i < size; i++)
         {
             for (int j = 0; j < size; j++)
@@ -149,7 +152,7 @@ public class Screen
             matrix[s.segments[i].y, s.segments[i].x] = 'O';
         }
         Console.SetCursorPosition(0, 0);
-        for (int i = 0; i < (size*2)+2; i++)
+        for (int i = 0; i < (size * 2) + 2; i++)
         {
             Console.Write("#");
         }
@@ -159,7 +162,7 @@ public class Screen
             Console.Write("#");
             for (int j = 0; j < size; j++)
             {
-                Console.Write("."+matrix[i, j]);
+                Console.Write("." + matrix[i, j]);
             }
             Console.Write("#");
             Console.WriteLine();
@@ -168,14 +171,14 @@ public class Screen
         {
             Console.Write("#");
         }
-        Console.WriteLine("\n"+ s.segments.Length);
+        Console.WriteLine("\n" + s.segments.Length);
     }
 }
 public class Program
 {
     public static void Main(string[] args)
     {
-        const int GAMEFIELD = 4; // size of the game field
+        const int GAMEFIELD = 60; // size of the game field
         Screen screen = new Screen(GAMEFIELD);
         Snake snake = new Snake(3, 0); // initial position of the snake
         snake.food.GenerateFood(snake.segments, GAMEFIELD);
@@ -185,7 +188,7 @@ public class Program
             snake.Move();
             snake.CheckCollision(GAMEFIELD);
             screen.UpdateScreen(snake);
-            Thread.Sleep(200); //game speed (ms)
+            Thread.Sleep(1); //game speed (ms)
 
             if (snake.segments.Length == (Math.Pow(GAMEFIELD, 2)))
             {
