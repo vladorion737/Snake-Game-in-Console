@@ -1,8 +1,15 @@
 ﻿using System.Media;
 
-public class Snake
+abstract public class GameConfig
 {
-    public char dir { get; set; } = 'R'; // R, L, U, D
+    public const int gameField = 9;
+    public const int gameSpeed = 300;
+    public const string WAV_PATH = "../../assets/bipka.wav";
+}
+
+public class Snake : GameConfig
+{
+    public char dir { get; set; } = 'R';
     public Segment[] segments { get; set; }
     public Food food { get; set; } = new Food();
     public bool dead { get; set; } = false;
@@ -45,22 +52,22 @@ public class Snake
             ConsoleKeyInfo key = Console.ReadKey(true);
             switch (key.Key)
             {
-                case ConsoleKey.RightArrow:
+                case ConsoleKey.D:
                     if (dir != 'L') dir = 'R';
                     break;
-                case ConsoleKey.LeftArrow:
+                case ConsoleKey.A:
                     if (dir != 'R') dir = 'L';
                     break;
-                case ConsoleKey.UpArrow:
+                case ConsoleKey.W:
                     if (dir != 'D') dir = 'U';
                     break;
-                case ConsoleKey.DownArrow:
+                case ConsoleKey.S:
                     if (dir != 'U') dir = 'D';
                     break;
             }
         }
     }
-    public void CheckCollision(int gamefield)
+    public void CheckCollision()
     {
         if (segments[0].x == food.x && segments[0].y == food.y)
         {
@@ -72,9 +79,9 @@ public class Snake
             newSegments[segments.Length] = new Segment { x = segments[segments.Length - 1].x, y = segments[segments.Length - 1].y };
             segments = newSegments;
 
-            food.GenerateFood(segments, gamefield);
+            food.GenerateFood(segments);
         }
-        if (segments[0].x < 0 || segments[0].x >= gamefield || segments[0].y < 0 || segments[0].y >= gamefield)
+        if (segments[0].x < 0 || segments[0].x >= gameField || segments[0].y < 0 || segments[0].y >= gameField)
         {
             dead = true;
             Console.WriteLine("Game Over! You hit the wall.");
@@ -97,24 +104,24 @@ public class Snake
         public int x { get; set; }
         public int y { get; set; }
     }
-    public class Food
+    public class Food : GameConfig
     {
-        SoundPlayer player = new SoundPlayer("../../../bipka.wav");
+        SoundPlayer player = new SoundPlayer(WAV_PATH);
         public int x { get; set; }
         public int y { get; set; }
 
-        public void GenerateFood(Segment[] segments, int gamefield)
+        public void GenerateFood(Segment[] segments)
         {
             player.Play();
             Random rand = new Random();
-            x = rand.Next(0, gamefield);
-            y = rand.Next(0, gamefield);
+            x = rand.Next(0, gameField);
+            y = rand.Next(0, gameField);
 
             for (int i = 0; i < segments.Length; i++)
             {
                 if (x == segments[i].x && y == segments[i].y)
                 {
-                    GenerateFood(segments, gamefield);
+                    GenerateFood(segments);
                     return;
                 }
             }
@@ -123,13 +130,14 @@ public class Snake
     }
 
 }
-public class Screen
+public class Screen : GameConfig
 {
     char[,] matrix = new char[25, 25];
     int size = 25;
 
-    public Screen(int size)
+    public Screen()
     {
+        int size = GameConfig.gameField;
         char[,] input_matrix = new char[size, size];
         matrix = input_matrix;
         this.size = size;
@@ -174,23 +182,22 @@ public class Screen
         Console.WriteLine("\n" + s.segments.Length);
     }
 }
-public class Program
+public class Program : GameConfig
 {
     public static void Main(string[] args)
     {
-        const int GAMEFIELD = 60; // size of the game field
-        Screen screen = new Screen(GAMEFIELD);
-        Snake snake = new Snake(3, 0); // initial position of the snake
-        snake.food.GenerateFood(snake.segments, GAMEFIELD);
+        Screen screen = new Screen();
+        Snake snake = new Snake(3, 0);
+        snake.food.GenerateFood(snake.segments);
         while (true)
         {
             snake.KeyPress(screen);
             snake.Move();
-            snake.CheckCollision(GAMEFIELD);
+            snake.CheckCollision();
             screen.UpdateScreen(snake);
-            Thread.Sleep(1); //game speed (ms)
+            Thread.Sleep(gameSpeed);
 
-            if (snake.segments.Length == (Math.Pow(GAMEFIELD, 2)))
+            if (snake.segments.Length == (Math.Pow(gameField, 2)))
             {
                 Console.WriteLine("You win! You filled the entire game field.");
                 Thread.Sleep(2000);
