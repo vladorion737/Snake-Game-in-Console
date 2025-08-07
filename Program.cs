@@ -206,3 +206,5 @@ public class Program : GameConfig
         }
     }
 }
+
+//хуй
